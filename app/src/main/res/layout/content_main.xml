@@ -12,8 +12,28 @@
     tools:context="tirol.peer.david.computervision.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <LinearLayout android:id="@+id/GaborSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Sigma:  "
+            android:textSize="15pt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <EditText android:id="@+id/EditText"
+            android:text="0"
+            android:textAlignment="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+    <ImageView android:id="@+id/ImgView"
+        android:layout_below="@id/GaborSettings"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </ImageView>
 </RelativeLayout>

@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ComputerVision.iml" filepath="$PROJECT_DIR$/ComputerVision.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/libs.iml" filepath="$PROJECT_DIR$/libs/libs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/opencv/opencv.iml" filepath="$PROJECT_DIR$/libs/opencv/opencv.iml" />
     </modules>
   </component>
 </project>
