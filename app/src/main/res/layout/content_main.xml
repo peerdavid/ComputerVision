@@ -30,10 +30,22 @@
     </LinearLayout>
 
 
-    <ImageView android:id="@+id/ImgView"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_below="@id/GaborSettings"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    </ImageView>
+        <!--<ImageView android:id="@+id/KernelView"
+            android:layout_below="@id/GaborSettings"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="80"/>-->
+
+        <ImageView android:id="@+id/ImgView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0"/>
+
+    </LinearLayout>
 </RelativeLayout>

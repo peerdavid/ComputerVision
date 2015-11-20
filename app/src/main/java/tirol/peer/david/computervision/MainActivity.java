@@ -85,41 +85,44 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && null != data) {
             Uri selectedImage = data.getData();
-            ImageView imageView = (ImageView) findViewById(R.id.ImgView);
             EditText textEdit = (EditText) findViewById(R.id.EditText);
 
             try {
                 Bitmap origBmp = getBitmapFromUri(selectedImage);
-                Mat origImage = new Mat (origBmp.getWidth(), origBmp.getHeight(), CvType.CV_8UC1);
-                Utils.bitmapToMat(origBmp, origImage);
-
                 double sigma = Double.valueOf(textEdit.getText().toString());
+                gaborFilter(origBmp, sigma);
 
-                Mat newImage = gaborFilter(origImage,sigma);
-                Bitmap newBmp = origBmp;
-                Utils.matToBitmap(newImage, newBmp);
-
-                imageView.setImageBitmap(newBmp);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private Mat gaborFilter(Mat img, double theta) {
-        Size kSize = new Size(31,31);
+    private void gaborFilter(Bitmap origBmp, double theta) {
 
+        // Load all views
+        ImageView imageView = (ImageView) findViewById(R.id.ImgView);
+
+        // Bitmap to matrix
+        Mat img = new Mat (origBmp.getWidth(), origBmp.getHeight(), CvType.CV_8UC1);
+        Utils.bitmapToMat(origBmp, img);
+
+        // Gabor filter settings
+        Size kernelSize = new Size(31,31);
         double lambda = 30;
         double sigma = 24;
         double gamma = 1;
         double psi =  0;
 
-        Mat kernel = Imgproc.getGaborKernel(kSize, sigma, theta, lambda, gamma, psi, CvType.CV_32F);
-
+        // Do the convolution
+        Mat kernel = Imgproc.getGaborKernel(kernelSize, sigma, theta, lambda, gamma, psi, CvType.CV_32F);
         Mat gabor = new Mat (img.width(), img.height(), CvType.CV_8UC1);
         Imgproc.filter2D(img, gabor, -1, kernel);
 
-        return gabor;
+        // Show image
+        Bitmap newBmp = origBmp;
+        Utils.matToBitmap(gabor, newBmp);
+        imageView.setImageBitmap(newBmp);
     }
 
 
