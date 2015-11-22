@@ -12,7 +12,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.ImageView;
 
 import org.opencv.android.Utils;
@@ -26,17 +25,23 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.security.InvalidParameterException;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int IMAGE_GAUSS = 1;
-    private static final int DETECT_CORNERS = 2;
+    private static final int LOAD_IMAGE = 1;
 
+    private static Mat mOriginalImage = null;
+    private static Mat mCurrentImage = null;
+
+
+    /*
+     * Link open cv c++ libs
+     */
     static {
         // If you use opencv 2.4, System.loadLibrary("opencv_java")
         System.loadLibrary("opencv_java3");
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,31 +55,23 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-                startActivityForResult(i, IMAGE_GAUSS);
-            }
-        });
-
-        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
-        fab2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-                startActivityForResult(i, DETECT_CORNERS);
+                loadImageFromGallery();
             }
         });
     }
 
 
+    private void loadImageFromGallery() {
+        Intent i = new Intent(
+                Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        startActivityForResult(i, LOAD_IMAGE);
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -82,15 +79,37 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if(mOriginalImage == null){
+            loadImageFromGallery();
             return true;
         }
+
+        switch (id){
+            case R.id.action_reset:
+                resetCurrentImage();
+                break;
+
+            case R.id.action_gabor:
+                applyGaborFilter(0);
+                break;
+
+            case R.id.action_harries:
+                applyHarriesCornerDetection();
+                break;
+
+            case R.id.action_canny:
+                applyCannyEdgeDetector();
+                break;
+
+            case R.id.action_gaussian:
+                applyGaussianBlur();
+                break;
+
+        }
+
+        setAndViewCurrentImage();
 
         return super.onOptionsItemSelected(item);
     }
@@ -100,84 +119,67 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(resultCode != RESULT_OK || data == null){
+        if(requestCode != LOAD_IMAGE || resultCode != RESULT_OK || data == null){
             return;
         }
 
         // Load all views and image
-        ImageView imageView = (ImageView) findViewById(R.id.ImgView);
         Uri imageUri = data.getData();
         Bitmap fullBmp = getBitmapFromUri(imageUri);
+
+        // Scale down for better performance
         Bitmap imageBmp = Bitmap.createScaledBitmap(fullBmp, fullBmp.getWidth() / 4, fullBmp.getHeight() / 4, false);
 
         // Convert to mat...
         Mat imageMat = new Mat (imageBmp.getWidth(), imageBmp.getHeight(), CvType.CV_8UC1);
         Utils.bitmapToMat(imageBmp, imageMat);
-        Mat result;
 
-        // Convert image to grayscale
+        // Grayscale image
         Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_BGR2GRAY);
 
-        // Do some cv stuff
-        switch (requestCode) {
-            case IMAGE_GAUSS:
-                EditText textEdit = (EditText) findViewById(R.id.EditText);
-                double sigma = Double.valueOf(textEdit.getText().toString());
-                result = gaborFilter(imageMat, sigma);
-                break;
+        // This is our new original image (to reset filters etc.)
+        mOriginalImage = imageMat.clone();
+        resetCurrentImage();
 
-            case DETECT_CORNERS:
-                result = cornerDetection(imageMat);
-                break;
-
-            default:
-                throw new InvalidParameterException("Unknown request code");
-        }
-
-        // Show result image
-        Utils.matToBitmap(result, imageBmp);
-        imageView.setImageBitmap(imageBmp);
+        setAndViewCurrentImage();
     }
 
 
     /**
-     * Create a gabor kernel and conv. with the image
-     * @param img
-     * @param theta
+     * Apply gabor filter on our current image
+     * @param theta orientation of our convolution kernel
      * @return
      */
-    private Mat gaborFilter(Mat img, double theta) {
-        // Gabor filter settings
+    private void applyGaborFilter(double theta) {
         Size kernelSize = new Size(31,31);
         double lambda = 30;
         double sigma = 24;
         double gamma = 1;
         double psi =  0;
 
-        // Do the convolution
+        // Do the gabor convolution
         Mat kernel = Imgproc.getGaborKernel(kernelSize, sigma, theta, lambda, gamma, psi, CvType.CV_32F);
-        Mat gabor = new Mat (img.width(), img.height(), CvType.CV_8UC1);
-        Imgproc.filter2D(img, gabor, -1, kernel);
-
-        return gabor;
+        Imgproc.filter2D(mCurrentImage, mCurrentImage, -1, kernel);
     }
 
 
-    /**
-     * Feature detection with harris corner detector
-     * @param img
-     * @return
-     */
-    private Mat cornerDetection(Mat img) {
+    private void applyCannyEdgeDetector(){
+        Imgproc.Canny(mCurrentImage, mCurrentImage, 10, 100);
+    }
+
+
+    private void applyGaussianBlur(){
+        Imgproc.GaussianBlur(mCurrentImage, mCurrentImage, new Size(5, 5), 2);
+    }
+
+
+    private void applyHarriesCornerDetection() {
 
         Mat corners = new Mat();
 
-        // Apply gaussian blur to smooth all corners, lines etc.
-        Imgproc.GaussianBlur(img, img, new Size(5, 5), 2);
-
         // Find corners
         Mat tempDst = new Mat();
-        Imgproc.cornerHarris(img, tempDst, 5, 3, 0.04);
+        Imgproc.cornerHarris(mCurrentImage, tempDst, 5, 3, 0.04);
 
         // Normalize harries output
         Mat tempDstNorm = new Mat();
@@ -188,21 +190,31 @@ public class MainActivity extends AppCompatActivity {
         for(int i = 0; i < tempDstNorm.cols(); i++){
             for(int j = 0; j < tempDstNorm.rows(); j++){
                 double[] value = tempDstNorm.get(j, i);
-                if(value[0] > 80){
-                    Imgproc.circle(corners, new Point(i,j), 10, new Scalar(250, 4));
+                // If value is too small, its not a corner...
+                if(value[0] < 130) {
+                    continue;
                 }
+
+                Imgproc.circle(mCurrentImage, new Point(i,j), 10, new Scalar(100));
             }
         }
-
-        return corners;
     }
 
 
-    /**
-     * Helper to read bitmap from gallery
-     * @param uri
-     * @return
-     */
+    private void resetCurrentImage(){
+        mCurrentImage = mOriginalImage.clone();
+    }
+
+
+    private void setAndViewCurrentImage(){
+        ImageView imageView = (ImageView) findViewById(R.id.ImgView);
+
+        Bitmap bmp = Bitmap.createBitmap(mCurrentImage.width(), mCurrentImage.height(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(mCurrentImage, bmp);
+        imageView.setImageBitmap(bmp);
+    }
+
+
     private Bitmap getBitmapFromUri(Uri uri) {
         try {
             ParcelFileDescriptor parcelFileDescriptor = getContentResolver().openFileDescriptor(uri, "r");

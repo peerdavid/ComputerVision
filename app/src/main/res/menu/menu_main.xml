@@ -2,9 +2,34 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="tirol.peer.david.computervision.MainActivity">
+
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_reset"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="@string/action_reset"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_gabor"
+        android:orderInCategory="100"
+        android:title="@string/action_gabor"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_gaussian"
+        android:orderInCategory="100"
+        android:title="@string/action_gaussian"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_canny"
+        android:orderInCategory="100"
+        android:title="@string/action_canny"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_harries"
+        android:orderInCategory="100"
+        android:title="@string/action_harries"
         app:showAsAction="never" />
 </menu>

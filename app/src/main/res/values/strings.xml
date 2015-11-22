@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">ComputerVision</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_gabor">Gabor Filter</string>
+    <string name="action_harries">Harries Corner Detector</string>
+    <string name="action_reset">Reset Image</string>
+    <string name="action_canny">Canny Edge Detector</string>
+    <string name="action_gaussian">Gaussian Blur</string>
 </resources>
