@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:opencv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -9,25 +10,21 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="tirol.peer.david.computervision.MainActivity"
-    tools:showIn="@layout/activity_main">
-
+    tools:context="tirol.peer.david.computervision.VideoActivity"
+    tools:showIn="@layout/activity_video">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
-        <Button android:id="@+id/btnImage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/title_activity_image"/>
-
-        <Button android:id="@+id/btnVideo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/title_activity_video"/>
+        <org.opencv.android.JavaCameraView android:id="@+id/cameraView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:visibility="gone"
+            opencv:show_fps="true"
+            opencv:camera_id="front"/>
 
     </LinearLayout>
+
 </RelativeLayout>

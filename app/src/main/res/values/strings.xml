@@ -6,4 +6,5 @@
     <string name="action_canny">Canny Edge Detector</string>
     <string name="action_gaussian">Gaussian Blur</string>
     <string name="title_activity_image">Image</string>
+    <string name="title_activity_video">Video</string>
 </resources>
