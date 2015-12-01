@@ -49,7 +49,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mGabor = new Gabor(new Size(15, 15), 3, 4, 1, 0);
+        mGabor = new Gabor();
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.cameraView);
         mOpenCvCameraView.setCvCameraViewListener(this);
@@ -63,7 +63,6 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mShouldRecordFrames = false;
                 computeAndViewXt();
             }
         });
@@ -142,20 +141,20 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
         new Thread(new Runnable() {
             public void run() {
+                mShouldRecordFrames = false;
+
                 Mat selectedFrame = mFrames.get(0);
 
                 for(int i = 0; i < selectedFrame.height(); i++) {
                     Mat xtMat = getXtImageForY(i);
 
-                    double[] orientations = new double [] {
-                            //1 * Math.PI / 4,
-                            //2 * Math.PI / 4,
-                            3 * Math.PI / 4,
-                            //4 * Math.PI / 4,
-                    };
-                    mGabor.applyEnergyOfGabor(xtMat, orientations);
+                    mGabor.applyEnergyOfGabor(xtMat);
 
                     replaceXtPixelsOfFrame(xtMat, i, 0);
+
+                    // Blur and canny for a awesome view
+                    Imgproc.GaussianBlur(xtMat, xtMat, new Size(5, 5), 2);
+                    Imgproc.Canny(xtMat, xtMat, 10, 100);
 
                     final Bitmap bmp = Bitmap.createBitmap(selectedFrame.width(), selectedFrame.height(), Bitmap.Config.RGB_565);
                     Utils.matToBitmap(selectedFrame, bmp);
@@ -171,14 +170,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
 /*
                 Mat xtMat = getXtImageForY(20);
-
-                double[] orientations = new double [] {
-                        //1 * Math.PI / 4,
-                        //2 * Math.PI / 4,
-                        3 * Math.PI / 4,
-                        //4 * Math.PI / 4,
-                };
-                mGabor.applyEnergyOfGabor(xtMat, orientations);
+                mGabor.applyEnergyOfGabor(xtMat);
 
                 final Bitmap bmp = Bitmap.createBitmap(xtMat.width(), xtMat.height(), Bitmap.Config.RGB_565);
                 Utils.matToBitmap(xtMat, bmp);
@@ -189,8 +181,8 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
                     public void run() {
                         mImageView.setImageBitmap(bmp);
                     }
-                });
-*/
+                });*/
+
                 mShouldRecordFrames = true;
             }
         }).start();

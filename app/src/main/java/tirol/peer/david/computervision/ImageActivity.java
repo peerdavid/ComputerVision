@@ -147,7 +147,7 @@ public class ImageActivity extends AppCompatActivity {
     }
 
     private void applyEnergyOfGabor(){
-        Gabor gabor = new Gabor(new Size(31,31), 30, 24, 1, 0);
+        Gabor gabor = new Gabor();
         gabor.applyEnergyOfGabor(mCurrentImage);
     }
 
