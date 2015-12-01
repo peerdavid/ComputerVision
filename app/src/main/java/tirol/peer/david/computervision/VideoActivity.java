@@ -1,7 +1,6 @@
 package tirol.peer.david.computervision;
 
 import android.graphics.Bitmap;
-import android.graphics.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -11,20 +10,20 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
 
-import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -61,7 +60,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSequence.clear();
+                computeAndViewXt();
             }
         });
     }
@@ -99,7 +98,6 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
     }
 
 
-    int mUpdateXt =0;
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = convertAndRotateFrame(inputFrame);
         Imgproc.cvtColor(mRgba, mGray, Imgproc.COLOR_BGRA2GRAY);
@@ -107,11 +105,8 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         // Insert a clone into our sequence, otherwise every pic is the same...
         insertFrame(mGray.clone());
 
-        mUpdateXt++;
-        if(mUpdateXt % 4 == 0){
-            computeAndViewXt();
-            mUpdateXt = 0;
-        }
+        // Paint a line for testing only
+        Imgproc.line(mGray, new Point(0, 20), new Point(200, 20), new Scalar(80), 2);
 
         return mGray;
     }
@@ -134,20 +129,28 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         mSequence.add(0, mat);
     }
 
+
     private void computeAndViewXt() {
+        if(mSequence.isEmpty()){
+            return;
+        }
+
+        Mat xtMat = getXtImageForY(20);
+        //applyGabor(xtMat, 45);
+        final Bitmap bmp = Bitmap.createBitmap(xtMat.width(), xtMat.height(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(xtMat, bmp);
+
+        // Post image to ui
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                Mat xtMat = getXtImageFromFrame(20);
-                Bitmap bmp = Bitmap.createBitmap(xtMat.width(), xtMat.height(), Bitmap.Config.RGB_565);
-                Utils.matToBitmap(xtMat, bmp);
                 mImageView.setImageBitmap(bmp);
             }
         });
     }
 
 
-    public Mat getXtImageFromFrame(int yPosition) {
+    private Mat getXtImageForY(int yPosition) {
         int currentSize = mSequence.size();
         Mat xtMat = new Mat(currentSize, mSequence.get(0).cols(), mSequence.get(0).type());
 
@@ -158,5 +161,36 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         }
 
         return xtMat;
+    }
+
+
+    private void applyGabor(Mat mat, double theta){
+        Mat even = getEvenGaborKernel(theta);
+        Mat odd = getOddGaborKernel(theta);
+        Imgproc.filter2D(mat, mat, -1, even);
+    }
+
+
+    private Mat getOddGaborKernel(double theta){
+        Size kernelSize = new Size(31,31);
+        double lambda = 30;
+        double sigma = 24;
+        double gamma = 1;
+        double psi = 0 + (Math.PI / 2);
+
+        // Do the gabor convolution
+        return Imgproc.getGaborKernel(kernelSize, sigma, theta, lambda, gamma, psi, CvType.CV_32F);
+    }
+
+
+    private Mat getEvenGaborKernel(double theta){
+        Size kernelSize = new Size(31,31);
+        double lambda = 30;
+        double sigma = 24;
+        double gamma = 1;
+        double psi =  0;
+
+        // Do the gabor convolution
+        return Imgproc.getGaborKernel(kernelSize, sigma, theta, lambda, gamma, psi, CvType.CV_32F);
     }
 }
