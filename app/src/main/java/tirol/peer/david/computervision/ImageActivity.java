@@ -26,6 +26,8 @@ import org.opencv.imgproc.Imgproc;
 import java.io.FileDescriptor;
 import java.io.IOException;
 
+import tirol.peer.david.computervision.utils.Gabor;
+
 public class ImageActivity extends AppCompatActivity {
 
     private static final int LOAD_IMAGE = 1;
@@ -84,6 +86,10 @@ public class ImageActivity extends AppCompatActivity {
 
             case R.id.action_gabor:
                 applyGaborFilter(0);
+                break;
+
+            case R.id.action_energy_gabor:
+                applyEnergyOfGabor();
                 break;
 
             case R.id.action_harries:
@@ -153,6 +159,10 @@ public class ImageActivity extends AppCompatActivity {
         Imgproc.filter2D(mCurrentImage, mCurrentImage, -1, kernel);
     }
 
+    private void applyEnergyOfGabor(){
+        Gabor gabor = new Gabor();
+        gabor.applyEnergyOfGabor(mCurrentImage);
+    }
 
     private void applyCannyEdgeDetector(){
         Imgproc.Canny(mCurrentImage, mCurrentImage, 10, 100);
@@ -220,5 +230,4 @@ public class ImageActivity extends AppCompatActivity {
 
         return null;
     }
-
 }

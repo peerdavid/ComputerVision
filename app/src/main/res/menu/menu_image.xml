@@ -16,6 +16,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_energy_gabor"
+        android:orderInCategory="100"
+        android:title="@string/action_energy_gabor"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_gaussian"
         android:orderInCategory="100"
         android:title="@string/action_gaussian"

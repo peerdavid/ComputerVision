@@ -162,35 +162,4 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
         return xtMat;
     }
-
-
-    private void applyGabor(Mat mat, double theta){
-        Mat even = getEvenGaborKernel(theta);
-        Mat odd = getOddGaborKernel(theta);
-        Imgproc.filter2D(mat, mat, -1, even);
-    }
-
-
-    private Mat getOddGaborKernel(double theta){
-        Size kernelSize = new Size(31,31);
-        double lambda = 30;
-        double sigma = 24;
-        double gamma = 1;
-        double psi = 0 + (Math.PI / 2);
-
-        // Do the gabor convolution
-        return Imgproc.getGaborKernel(kernelSize, sigma, theta, lambda, gamma, psi, CvType.CV_32F);
-    }
-
-
-    private Mat getEvenGaborKernel(double theta){
-        Size kernelSize = new Size(31,31);
-        double lambda = 30;
-        double sigma = 24;
-        double gamma = 1;
-        double psi =  0;
-
-        // Do the gabor convolution
-        return Imgproc.getGaborKernel(kernelSize, sigma, theta, lambda, gamma, psi, CvType.CV_32F);
-    }
 }

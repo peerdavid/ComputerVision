@@ -1,10 +1,15 @@
 <resources>
     <string name="app_name">ComputerVision</string>
+
+    <!-- Image strings -->
+    <string name="title_activity_image">Image</string>
     <string name="action_gabor">Gabor Filter</string>
+    <string name="action_energy_gabor">Energy of gabor</string>
     <string name="action_harries">Harries Corner Detector</string>
     <string name="action_reset">Reset Image</string>
     <string name="action_canny">Canny Edge Detector</string>
     <string name="action_gaussian">Gaussian Blur</string>
-    <string name="title_activity_image">Image</string>
+
+    <!-- Video strings -->
     <string name="title_activity_video">Video</string>
 </resources>
