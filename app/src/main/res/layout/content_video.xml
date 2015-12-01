@@ -19,11 +19,17 @@
         android:layout_height="match_parent">
 
         <org.opencv.android.JavaCameraView android:id="@+id/cameraView"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="30"
             android:visibility="gone"
             opencv:show_fps="true"
-            opencv:camera_id="front"/>
+            opencv:camera_id="any"/>
+
+        <ImageView android:id="@+id/xtView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="50"/>
 
     </LinearLayout>
 
