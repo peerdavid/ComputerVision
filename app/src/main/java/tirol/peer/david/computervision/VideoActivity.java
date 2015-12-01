@@ -148,13 +148,10 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
                 for(int i = 0; i < selectedFrame.height(); i++) {
                     Mat xtMat = getXtImageForY(i);
 
+                    //Imgproc.GaussianBlur(xtMat, xtMat, new Size(5, 5), 2);
                     mGabor.applyEnergyOfGabor(xtMat);
 
                     replaceXtPixelsOfFrame(xtMat, i, 0);
-
-                    // Blur and canny for a awesome view
-                    Imgproc.GaussianBlur(xtMat, xtMat, new Size(5, 5), 2);
-                    Imgproc.Canny(xtMat, xtMat, 10, 100);
 
                     final Bitmap bmp = Bitmap.createBitmap(selectedFrame.width(), selectedFrame.height(), Bitmap.Config.RGB_565);
                     Utils.matToBitmap(selectedFrame, bmp);

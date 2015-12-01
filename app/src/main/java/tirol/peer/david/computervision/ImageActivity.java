@@ -142,12 +142,12 @@ public class ImageActivity extends AppCompatActivity {
     }
 
     private void applyGaborFilter(){
-        Gabor gabor = new Gabor(new Size(15, 15), 3, 4, 1, 1.5);
+        Gabor gabor = new Gabor(new Size(15, 15), 3, 4, 1, 1);
         gabor.applyGaborFilter(mCurrentImage, Math.PI / 4);
     }
 
     private void applyEnergyOfGabor(){
-        Gabor gabor = new Gabor(new Size(15, 15), 3, 4, 1, 1.5);
+        Gabor gabor = new Gabor(new Size(15, 15), 3, 4, 1, 1);
         gabor.applyEnergyOfGabor(mCurrentImage);
     }
 
