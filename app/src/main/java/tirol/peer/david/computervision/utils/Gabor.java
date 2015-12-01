@@ -48,18 +48,22 @@ public class Gabor {
      * @return
      */
     public void applyGaborFilter(Mat image, double theta) {
+        image.convertTo(image, CvType.CV_32F);
+
         // Do the gabor convolution
         Mat kernel = Imgproc.getGaborKernel(mKernelSize, mSigma, theta, mLambda, mGamma, mPsi, CvType.CV_32F);
         Imgproc.filter2D(image, image, -1, kernel);
+
+        image.convertTo(image, CvType.CV_8UC1);
     }
 
 
     public void applyEnergyOfGabor(Mat image){
         double[] orientations = new double [] {
+                0 * Math.PI / 4,
                 1 * Math.PI / 4,
                 2 * Math.PI / 4,
                 3 * Math.PI / 4,
-                4 * Math.PI / 4,
         };
 
         applyEnergyOfGabor(image, orientations);
@@ -67,10 +71,11 @@ public class Gabor {
 
 
     public void applyEnergyOfGabor(Mat image, double[] orientations){
+        image.convertTo(image, CvType.CV_32F);
+
         Mat energyOfGabor = new Mat(image.rows(), image.cols(), CvType.CV_32F);
         Mat tmp = new Mat(image.rows(), image.cols(), CvType.CV_32F);
 
-        //for(double theta = 0; theta <= Math.PI; theta += Math.PI/4){
         for(double theta : orientations){
 
             GaborKernel kernel = mGaborKernel.get(theta);

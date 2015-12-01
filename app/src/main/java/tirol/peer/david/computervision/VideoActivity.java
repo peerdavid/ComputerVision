@@ -36,7 +36,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
     private Gabor mGabor;
 
-    private final static int FRAME_SIZE = 40;
+    private final static int FRAME_SIZE = 30;
 
     private boolean mShouldRecordFrames = true;
 
@@ -49,7 +49,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mGabor = new Gabor();
+        mGabor = new Gabor(new Size(15, 15), 3, 4, 1, 1);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.cameraView);
         mOpenCvCameraView.setCvCameraViewListener(this);

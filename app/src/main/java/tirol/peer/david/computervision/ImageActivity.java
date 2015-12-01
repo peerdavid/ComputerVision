@@ -142,12 +142,12 @@ public class ImageActivity extends AppCompatActivity {
     }
 
     private void applyGaborFilter(){
-        Gabor gabor = new Gabor(new Size(20, 20), 5, 5, 1, 0);
+        Gabor gabor = new Gabor(new Size(15, 15), 3, 4, 1, 1.5);
         gabor.applyGaborFilter(mCurrentImage, Math.PI / 4);
     }
 
     private void applyEnergyOfGabor(){
-        Gabor gabor = new Gabor();
+        Gabor gabor = new Gabor(new Size(15, 15), 3, 4, 1, 1.5);
         gabor.applyEnergyOfGabor(mCurrentImage);
     }
 
@@ -197,7 +197,7 @@ public class ImageActivity extends AppCompatActivity {
     private void setAndViewCurrentImage(){
         ImageView imageView = (ImageView) findViewById(R.id.ImgView);
 
-        Bitmap bmp = Bitmap.createBitmap(mCurrentImage.width(), mCurrentImage.height(), Bitmap.Config.RGB_565);
+        Bitmap bmp = Bitmap.createBitmap(mCurrentImage.width(), mCurrentImage.height(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(mCurrentImage, bmp);
         imageView.setImageBitmap(bmp);
     }
