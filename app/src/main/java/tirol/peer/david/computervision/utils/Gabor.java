@@ -33,6 +33,8 @@ public class Gabor {
 
 
     public Gabor(Size kernelSize, double lambda, double sigma, double gamma, double psi){
+        this();
+
         mKernelSize = kernelSize;
         mLambda = lambda;
         mSigma = sigma;
@@ -40,12 +42,36 @@ public class Gabor {
         mPsi = psi;
     }
 
+    /**
+     * Apply gabor filter on our current image
+     * @param theta orientation of our convolution kernel
+     * @return
+     */
+    public void applyGaborFilter(Mat image, double theta) {
+        // Do the gabor convolution
+        Mat kernel = Imgproc.getGaborKernel(mKernelSize, mSigma, theta, mLambda, mGamma, mPsi, CvType.CV_32F);
+        Imgproc.filter2D(image, image, -1, kernel);
+    }
+
 
     public void applyEnergyOfGabor(Mat image){
+        double[] orientations = new double [] {
+                1 * Math.PI / 4,
+                2 * Math.PI / 4,
+                3 * Math.PI / 4,
+                4 * Math.PI / 4,
+        };
+
+        applyEnergyOfGabor(image, orientations);
+    }
+
+
+    public void applyEnergyOfGabor(Mat image, double[] orientations){
         Mat energyOfGabor = new Mat(image.rows(), image.cols(), CvType.CV_32F);
         Mat tmp = new Mat(image.rows(), image.cols(), CvType.CV_32F);
 
-        for(double theta = 0; theta <= Math.PI; theta += Math.PI/4){
+        //for(double theta = 0; theta <= Math.PI; theta += Math.PI/4){
+        for(double theta : orientations){
 
             GaborKernel kernel = mGaborKernel.get(theta);
 

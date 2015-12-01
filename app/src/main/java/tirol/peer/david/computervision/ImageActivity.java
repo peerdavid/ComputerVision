@@ -85,7 +85,7 @@ public class ImageActivity extends AppCompatActivity {
                 break;
 
             case R.id.action_gabor:
-                applyGaborFilter(0);
+                applyGaborFilter();
                 break;
 
             case R.id.action_energy_gabor:
@@ -141,26 +141,13 @@ public class ImageActivity extends AppCompatActivity {
         setAndViewCurrentImage();
     }
 
-
-    /**
-     * Apply gabor filter on our current image
-     * @param theta orientation of our convolution kernel
-     * @return
-     */
-    private void applyGaborFilter(double theta) {
-        Size kernelSize = new Size(31,31);
-        double lambda = 30;
-        double sigma = 24;
-        double gamma = 1;
-        double psi =  0;
-
-        // Do the gabor convolution
-        Mat kernel = Imgproc.getGaborKernel(kernelSize, sigma, theta, lambda, gamma, psi, CvType.CV_32F);
-        Imgproc.filter2D(mCurrentImage, mCurrentImage, -1, kernel);
+    private void applyGaborFilter(){
+        Gabor gabor = new Gabor(new Size(20, 20), 5, 5, 1, 0);
+        gabor.applyGaborFilter(mCurrentImage, Math.PI / 4);
     }
 
     private void applyEnergyOfGabor(){
-        Gabor gabor = new Gabor();
+        Gabor gabor = new Gabor(new Size(31,31), 30, 24, 1, 0);
         gabor.applyEnergyOfGabor(mCurrentImage);
     }
 

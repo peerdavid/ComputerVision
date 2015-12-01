@@ -13,17 +13,14 @@ import android.widget.ImageView;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+
+import tirol.peer.david.computervision.utils.Gabor;
 
 
 /**
@@ -33,12 +30,15 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
     private Mat mRgba;
     private Mat mGray;
-    private List<Mat> mSequence = new LinkedList<>();
+    private List<Mat> mFrames = new LinkedList<>();
     private CameraBridgeViewBase mOpenCvCameraView;
     private ImageView mImageView;
 
+    private Gabor mGabor;
+
     private final static int FRAME_SIZE = 40;
 
+    private boolean mShouldRecordFrames = true;
 
     private Handler mHandler = new Handler();
 
@@ -49,10 +49,13 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mGabor = new Gabor(new Size(15, 15), 3, 4, 1, 0);
+
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.cameraView);
         mOpenCvCameraView.setCvCameraViewListener(this);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.enableView();
+        mOpenCvCameraView.setMaxFrameSize(400, 300);
 
         mImageView = (ImageView) findViewById(R.id.xtView);
 
@@ -60,6 +63,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mShouldRecordFrames = false;
                 computeAndViewXt();
             }
         });
@@ -105,9 +109,6 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         // Insert a clone into our sequence, otherwise every pic is the same...
         insertFrame(mGray.clone());
 
-        // Paint a line for testing only
-        Imgproc.line(mGray, new Point(0, 20), new Point(200, 20), new Scalar(80), 2);
-
         return mGray;
     }
 
@@ -122,44 +123,97 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
 
     private void insertFrame(Mat mat){
-        if(mSequence.size() > FRAME_SIZE){
-            mSequence.remove(mSequence.size() - 1);
+        if(!mShouldRecordFrames){
+            return;
         }
 
-        mSequence.add(0, mat);
+        if(mFrames.size() > FRAME_SIZE){
+            mFrames.remove(mFrames.size() - 1);
+        }
+
+        mFrames.add(0, mat);
     }
 
 
     private void computeAndViewXt() {
-        if(mSequence.isEmpty()){
+        if(mFrames.isEmpty()){
             return;
         }
 
-        Mat xtMat = getXtImageForY(20);
-        //applyGabor(xtMat, 45);
-        final Bitmap bmp = Bitmap.createBitmap(xtMat.width(), xtMat.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(xtMat, bmp);
-
-        // Post image to ui
-        mHandler.post(new Runnable() {
-            @Override
+        new Thread(new Runnable() {
             public void run() {
-                mImageView.setImageBitmap(bmp);
+                Mat selectedFrame = mFrames.get(0);
+
+                for(int i = 0; i < selectedFrame.height(); i++) {
+                    Mat xtMat = getXtImageForY(i);
+
+                    double[] orientations = new double [] {
+                            //1 * Math.PI / 4,
+                            //2 * Math.PI / 4,
+                            3 * Math.PI / 4,
+                            //4 * Math.PI / 4,
+                    };
+                    mGabor.applyEnergyOfGabor(xtMat, orientations);
+
+                    replaceXtPixelsOfFrame(xtMat, i, 0);
+
+                    final Bitmap bmp = Bitmap.createBitmap(selectedFrame.width(), selectedFrame.height(), Bitmap.Config.RGB_565);
+                    Utils.matToBitmap(selectedFrame, bmp);
+
+                    // Post image to ui
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mImageView.setImageBitmap(bmp);
+                        }
+                    });
+                }
+
+/*
+                Mat xtMat = getXtImageForY(20);
+
+                double[] orientations = new double [] {
+                        //1 * Math.PI / 4,
+                        //2 * Math.PI / 4,
+                        3 * Math.PI / 4,
+                        //4 * Math.PI / 4,
+                };
+                mGabor.applyEnergyOfGabor(xtMat, orientations);
+
+                final Bitmap bmp = Bitmap.createBitmap(xtMat.width(), xtMat.height(), Bitmap.Config.RGB_565);
+                Utils.matToBitmap(xtMat, bmp);
+
+                // Post image to ui
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mImageView.setImageBitmap(bmp);
+                    }
+                });
+*/
+                mShouldRecordFrames = true;
             }
-        });
+        }).start();
     }
 
 
     private Mat getXtImageForY(int yPosition) {
-        int currentSize = mSequence.size();
-        Mat xtMat = new Mat(currentSize, mSequence.get(0).cols(), mSequence.get(0).type());
+        int currentSize = mFrames.size();
+        Mat xtMat = new Mat(currentSize, mFrames.get(0).cols(), mFrames.get(0).type());
 
         for(int i = 0; i < currentSize; i++){
-            for(int j = 0; j < mSequence.get(0).cols(); j++){
-                xtMat.put(i, j, new double[] {mSequence.get(i).get(yPosition, j)[0]});
+            for(int j = 0; j < mFrames.get(0).cols(); j++){
+                xtMat.put(i, j, new double[] {mFrames.get(i).get(yPosition, j)[0]});
             }
         }
 
         return xtMat;
+    }
+
+
+    private void replaceXtPixelsOfFrame(Mat xtMat, int yPosition, int frameToReplace){
+        for(int j = 0; j < mFrames.get(0).cols(); j++){
+            mFrames.get(frameToReplace).put(yPosition, j, xtMat.get(frameToReplace, j));
+        }
     }
 }
