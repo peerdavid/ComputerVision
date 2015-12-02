@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ComputerVision</string>
+    <string name="app_name">Computer Vision</string>
 
     <!-- Image strings -->
     <string name="title_activity_image">Image</string>

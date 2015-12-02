@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -36,7 +37,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
     private Gabor mGabor;
 
-    private final static int FRAME_SIZE = 30;
+    private final static int FRAME_SIZE = 15;
 
     private boolean mShouldRecordFrames = true;
 
@@ -49,7 +50,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mGabor = new Gabor(new Size(15, 15), 3, 4, 1, 1);
+        mGabor = new Gabor(new Size(FRAME_SIZE, FRAME_SIZE), 3, 4, Math.PI, 1);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.cameraView);
         mOpenCvCameraView.setCvCameraViewListener(this);
@@ -143,18 +144,19 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
             public void run() {
                 mShouldRecordFrames = false;
 
-                Mat selectedFrame = mFrames.get(0);
+                Mat selectedFrame = mFrames.get(FRAME_SIZE / 2);
 
                 for(int i = 0; i < selectedFrame.height(); i++) {
                     Mat xtMat = getXtImageForY(i);
-
-                    //Imgproc.GaussianBlur(xtMat, xtMat, new Size(5, 5), 2);
                     mGabor.applyEnergyOfGabor(xtMat);
 
-                    replaceXtPixelsOfFrame(xtMat, i, 0);
+                    replaceXtPixelsOfFrame(xtMat, i, FRAME_SIZE / 2);
 
-                    final Bitmap bmp = Bitmap.createBitmap(selectedFrame.width(), selectedFrame.height(), Bitmap.Config.RGB_565);
-                    Utils.matToBitmap(selectedFrame, bmp);
+                    Mat tmp = selectedFrame.clone();
+                    Core.normalize(tmp, tmp, 0, 255, Core.NORM_MINMAX, CvType.CV_8U);
+
+                    final Bitmap bmp = Bitmap.createBitmap(tmp.width(), tmp.height(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(tmp, bmp);
 
                     // Post image to ui
                     mHandler.post(new Runnable() {

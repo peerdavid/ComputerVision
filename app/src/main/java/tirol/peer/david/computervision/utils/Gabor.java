@@ -96,11 +96,9 @@ public class Gabor {
             Core.add(evenF, oddF, tmp);
             Core.sqrt(tmp, tmp);
             Core.add(energyOfGabor, tmp, energyOfGabor);
-
-            Core.normalize(energyOfGabor, energyOfGabor, 0, 255, Core.NORM_MINMAX);
         }
 
-        energyOfGabor.convertTo(image, CvType.CV_8UC1);
+        energyOfGabor.convertTo(image, CvType.CV_32F);
     }
 
 
