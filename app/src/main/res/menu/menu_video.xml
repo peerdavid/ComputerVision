@@ -1,0 +1,37 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="tirol.peer.david.computervision.MainActivity">
+
+    <group>
+        <item
+            android:id="@+id/action_video_gabor_direction_static"
+            android:orderInCategory="100"
+            android:title="@string/action_video_gabor_direction_static"
+            app:showAsAction="never" />
+
+        <item
+            android:id="@+id/action_video_gabor_direction_left"
+            android:orderInCategory="100"
+            android:title="@string/action_video_gabor_direction_left"
+            app:showAsAction="never" />
+
+        <item
+            android:id="@+id/action_video_gabor_direction_flicker"
+            android:orderInCategory="100"
+            android:title="@string/action_video_gabor_direction_flicker"
+            app:showAsAction="never" />
+
+        <item
+            android:id="@+id/action_video_gabor_direction_right"
+            android:orderInCategory="100"
+            android:title="@string/action_video_gabor_direction_right"
+            app:showAsAction="never" />
+    </group>
+
+    <!-- 2nd motion analysis -->
+    <group>
+
+    </group>
+
+</menu>

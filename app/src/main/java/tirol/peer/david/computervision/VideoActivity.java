@@ -3,11 +3,11 @@ package tirol.peer.david.computervision;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.ImageView;
 
 import org.opencv.android.CameraBridgeViewBase;
@@ -57,14 +57,48 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         mOpenCvCameraView.setMaxFrameSize(400, 400);
 
         mImageView = (ImageView) findViewById(R.id.xtView);
+    }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                doMotionAnalysisOnFrames();
-            }
-        });
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_video, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        int gaborOrientation = 0;
+
+        switch (id){
+            case R.id.action_video_gabor_direction_static:
+                gaborOrientation = 0;
+                break;
+
+            case R.id.action_video_gabor_direction_left:
+                gaborOrientation = 1;
+                break;
+
+            case R.id.action_video_gabor_direction_flicker:
+                gaborOrientation = 2;
+                break;
+
+            case R.id.action_video_gabor_direction_right:
+                gaborOrientation = 3;
+                break;
+
+        }
+
+        double[] gaborOrientations = new double [] {
+                gaborOrientation * Math.PI / 4
+        };
+
+        doMotionAnalysisWithEnergyOfGabor(gaborOrientations);
+
+        return super.onOptionsItemSelected(item);
     }
 
 
@@ -118,6 +152,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
 
     private Mat rotateFrame(Mat image) {
+        //Mat tmp = image.clone();
         Mat tmp = image.t();
         Core.flip(image.t(), tmp, 1);
         Imgproc.resize(tmp, tmp, image.size());
@@ -146,8 +181,9 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
     /**
      * This function computes the motion analysis.
+     * @param orientations
      */
-    private void doMotionAnalysisOnFrames() {
+    private void doMotionAnalysisWithEnergyOfGabor(final double[] orientations) {
         if(frameComputationPossible()){
             return;
         }
@@ -158,7 +194,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         new Thread(new Runnable() {
             public void run() {
                 mFrameComputationRunning = false;
-                calculateAndDisplayMotion();
+                calculateAndDisplayMotion(orientations);
                 mFrameComputationRunning = true;
             }
 
@@ -166,12 +202,14 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
     }
 
 
-    private void calculateAndDisplayMotion() {
+    private void calculateAndDisplayMotion(double[] orientations) {
         Mat selectedFrame = mFrames.get(FRAME_TO_DISPLAY);
 
         for (int y = 0; y < selectedFrame.height(); y++) {
             Mat xtMat = computeXtImageOnHeight(y);
-            mGabor.applyEnergyOfGabor(xtMat);
+
+            mGabor.applyEnergyOfGabor(xtMat, orientations);
+
             replaceXtPixelsOfFrame(xtMat, y, FRAME_TO_DISPLAY);
             displayImage(selectedFrame);
         }
