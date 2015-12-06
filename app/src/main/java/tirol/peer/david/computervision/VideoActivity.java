@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceView;
@@ -29,6 +30,7 @@ import tirol.peer.david.computervision.utils.Gabor;
  */
 public class VideoActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
+    private static final String TAG = "tirol.peer.david.cv";
     private List<Mat> mFrames = new LinkedList<>();
     private CameraBridgeViewBase mOpenCvCameraView;
     private ImageView mImageView;
@@ -161,10 +163,10 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
 
     private Mat rotateFrame(Mat image) {
-        Mat tmp = image.clone();
-        //Mat tmp = image.t();
-        //Core.flip(image.t(), tmp, 1);
-        //Imgproc.resize(tmp, tmp, image.size());
+        //Mat tmp = image.clone();
+        Mat tmp = image.t();
+        Core.flip(image.t(), tmp, 1);
+        Imgproc.resize(tmp, tmp, image.size());
         return tmp;
     }
 
@@ -203,7 +205,12 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         new Thread(new Runnable() {
             public void run() {
                 mFrameComputationRunning = false;
+
+                long startTime = System.currentTimeMillis();
                 calculateAndDisplayMotion(orientations, type);
+                long executionTime = System.currentTimeMillis() - startTime;
+                Log.i(TAG, "Running motion type " + type + " takes " + executionTime + "ms.");
+
                 mFrameComputationRunning = true;
             }
 
@@ -216,6 +223,12 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
     }
 
 
+    /**
+     * Detect motion depending on the type. Note: Orientation is only
+     * available for energy of gabor
+     * @param orientations - Orientations of the energy of gabor
+     * @param type - Type of filter (9-tap or energy of gabor)
+     */
     private void calculateAndDisplayMotion(double[] orientations, int type) {
         Mat selectedFrame = mFrames.get(FRAME_TO_DISPLAY);
 
