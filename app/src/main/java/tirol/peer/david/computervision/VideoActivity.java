@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -36,6 +37,9 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
     private final static int NUM_OF_FRAMES = 15;
     private final static int FRAME_TO_DISPLAY = NUM_OF_FRAMES / 2;
+
+    private final static int TYPE_ENERGY_OF_GABOR = 0;
+    private final static int TYPE_9_TAP_FILTER = 1;
 
     private boolean mFrameComputationRunning = true;
 
@@ -72,6 +76,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         int id = item.getItemId();
 
         int gaborOrientation = 0;
+        int type = TYPE_ENERGY_OF_GABOR;
 
         switch (id){
             case R.id.action_video_gabor_direction_static:
@@ -90,13 +95,17 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
                 gaborOrientation = 3;
                 break;
 
+            case R.id.action_video_9tab:
+                type = TYPE_9_TAP_FILTER;
+                break;
+
         }
 
         double[] gaborOrientations = new double [] {
                 gaborOrientation * Math.PI / 4
         };
 
-        doMotionAnalysisWithEnergyOfGabor(gaborOrientations);
+        doMotionAnalysis(gaborOrientations, type);
 
         return super.onOptionsItemSelected(item);
     }
@@ -152,10 +161,10 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
 
 
     private Mat rotateFrame(Mat image) {
-        //Mat tmp = image.clone();
-        Mat tmp = image.t();
-        Core.flip(image.t(), tmp, 1);
-        Imgproc.resize(tmp, tmp, image.size());
+        Mat tmp = image.clone();
+        //Mat tmp = image.t();
+        //Core.flip(image.t(), tmp, 1);
+        //Imgproc.resize(tmp, tmp, image.size());
         return tmp;
     }
 
@@ -183,7 +192,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
      * This function computes the motion analysis.
      * @param orientations
      */
-    private void doMotionAnalysisWithEnergyOfGabor(final double[] orientations) {
+    private void doMotionAnalysis(final double[] orientations, final int type) {
         if(frameComputationPossible()){
             return;
         }
@@ -194,7 +203,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
         new Thread(new Runnable() {
             public void run() {
                 mFrameComputationRunning = false;
-                calculateAndDisplayMotion(orientations);
+                calculateAndDisplayMotion(orientations, type);
                 mFrameComputationRunning = true;
             }
 
@@ -202,22 +211,39 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
     }
 
 
-    private void calculateAndDisplayMotion(double[] orientations) {
+    private boolean frameComputationPossible() {
+        return mFrames != null && !mFrameComputationRunning;
+    }
+
+
+    private void calculateAndDisplayMotion(double[] orientations, int type) {
         Mat selectedFrame = mFrames.get(FRAME_TO_DISPLAY);
 
         for (int y = 0; y < selectedFrame.height(); y++) {
             Mat xtMat = computeXtImageOnHeight(y);
 
-            mGabor.applyEnergyOfGabor(xtMat, orientations);
+            // Apply filter depending on the type
+            switch(type) {
+                case TYPE_ENERGY_OF_GABOR:
+                    mGabor.applyEnergyOfGabor(xtMat, orientations);
+                    break;
 
-            replaceXtPixelsOfFrame(xtMat, y, FRAME_TO_DISPLAY);
+                case TYPE_9_TAP_FILTER:
+                    apply9TapFilter(xtMat);
+                    break;
+            }
+            replaceXtPixelsOfFrameAtPosition(xtMat, y, FRAME_TO_DISPLAY);
             displayImage(selectedFrame);
         }
     }
 
 
-    private boolean frameComputationPossible() {
-        return mFrames != null && !mFrameComputationRunning;
+    private void apply9TapFilter(Mat image) {
+        Mat kernelX = new Mat(1, 9, CvType.CV_32F);
+        kernelX.put(0,0, new double[] {0.0094, 0.1148, 0.3964, -0.0601, -0.9213, -0.0601, 0.3964, 0.1148, 0.0094});
+        Mat kernelT = new Mat(1, 9, CvType.CV_32F);
+        kernelT.put(0,0, new double[] {0.0008, 0.0176, 0.1660, 0.6383, 1.0, 0.6383, 0.1660, 0.0176, 0.0008});
+        Imgproc.sepFilter2D(image, image, CvType.CV_32F, kernelT, kernelX);
     }
 
 
@@ -265,7 +291,7 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
      * @param y - y position of our dest. image
      * @param t - Frame to use
      */
-    private void replaceXtPixelsOfFrame(Mat xtMat, int y, int t){
+    private void replaceXtPixelsOfFrameAtPosition(Mat xtMat, int y, int t){
         int width = mFrames.get(t).cols();
 
         for(int x = 0; x < width; x++){

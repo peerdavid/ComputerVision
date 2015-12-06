@@ -31,7 +31,11 @@
 
     <!-- 2nd motion analysis -->
     <group>
-
+        <item
+            android:id="@+id/action_video_9tab"
+            android:orderInCategory="100"
+            android:title="@string/action_video_9tab"
+            app:showAsAction="never" />
     </group>
 
 </menu>

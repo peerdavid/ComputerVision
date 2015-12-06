@@ -16,4 +16,5 @@
     <string name="action_video_gabor_direction_left">Gabor - Left</string>
     <string name="action_video_gabor_direction_flicker">Gabor - Flicker</string>
     <string name="action_video_gabor_direction_right">Gabor - Right</string>
+    <string name="action_video_9tab">9-tap filter</string>
 </resources>
