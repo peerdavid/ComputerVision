@@ -18,9 +18,13 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.FileDescriptor;
@@ -102,6 +106,10 @@ public class ImageActivity extends AppCompatActivity {
 
             case R.id.action_gaussian:
                 applyGaussianBlur();
+                break;
+
+            case R.id.action_feature_descriptor:
+                applyFeatureDescriptor();
                 break;
 
         }
@@ -186,6 +194,20 @@ public class ImageActivity extends AppCompatActivity {
                 Imgproc.circle(mCurrentImage, new Point(i,j), 10, new Scalar(100));
             }
         }
+    }
+
+
+    private void applyFeatureDescriptor(){
+        MatOfKeyPoint keypoints = new MatOfKeyPoint();
+        Mat descriptors = new Mat();
+        FeatureDetector featureDetector = FeatureDetector.create(FeatureDetector.ORB);
+        DescriptorExtractor descriptor = DescriptorExtractor.create(DescriptorExtractor.ORB);
+
+        featureDetector.detect(mCurrentImage, keypoints);
+        descriptor.compute(mCurrentImage, keypoints, descriptors);
+
+        Features2d.drawKeypoints(mCurrentImage, keypoints, mCurrentImage);
+        setAndViewCurrentImage();
     }
 
 

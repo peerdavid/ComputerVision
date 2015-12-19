@@ -27,20 +27,18 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Button btnImage = (Button) findViewById(R.id.btnImage);
-        btnImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(getBaseContext(), ImageActivity.class);
-                startActivity(i);
-            }
-        });
+        initOpenActivityBtn(R.id.btnImage, ImageActivity.class);
+        initOpenActivityBtn(R.id.btnVideo, VideoActivity.class);
+        initOpenActivityBtn(R.id.btnFeature, FeatureActivity.class);
+    }
 
-        Button btnVideo = (Button) findViewById(R.id.btnVideo);
-        btnVideo.setOnClickListener(new View.OnClickListener() {
+
+    private void initOpenActivityBtn(int btnId, final Class<?> activity){
+        Button btnFeature = (Button) findViewById(btnId);
+        btnFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getBaseContext(), VideoActivity.class);
+                Intent i = new Intent(getBaseContext(), activity);
                 startActivity(i);
             }
         });
