@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import tirol.peer.david.computervision.utils.Gabor;
+import tirol.peer.david.computervision.utils.OpenCvUtils;
 
 
 /**
@@ -141,39 +142,14 @@ public class VideoActivity extends AppCompatActivity implements CameraBridgeView
     /*
      * Camera event handler
      */
-    public void onCameraViewStarted(int width, int height) {
-    }
+    public void onCameraViewStarted(int width, int height) {}
 
-    public void onCameraViewStopped() {
-    }
-
+    public void onCameraViewStopped() {}
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat grayImage = convertAndRotateFrameToGray(inputFrame);
+        Mat grayImage = OpenCvUtils.convertAndRotateFrameToGray(inputFrame);
         insertFrameIfNoComputationIsRunning(grayImage);
         return grayImage;
-    }
-
-
-    private Mat convertAndRotateFrameToGray(CameraBridgeViewBase.CvCameraViewFrame inputFrame){
-        Mat image = inputFrame.rgba();
-        Mat mRgbaT = rotateFrame(image);
-        return rgbToGray(mRgbaT);
-    }
-
-
-    private Mat rotateFrame(Mat image) {
-        //Mat tmp = image.clone();
-        Mat tmp = image.t();
-        Core.flip(image.t(), tmp, 1);
-        Imgproc.resize(tmp, tmp, image.size());
-        return tmp;
-    }
-
-
-    private Mat rgbToGray(Mat mRgbaT) {
-        Imgproc.cvtColor(mRgbaT, mRgbaT, Imgproc.COLOR_BGRA2GRAY);
-        return mRgbaT;
     }
 
 

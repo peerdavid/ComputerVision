@@ -2,13 +2,16 @@
     <string name="app_name">Computer Vision</string>
 
     <!-- Image strings -->
-    <string name="title_activity_image">Feature Detection</string>
+    <string name="title_activity_image">Image formation</string>
     <string name="action_gabor">Gabor Filter</string>
     <string name="action_energy_gabor">Energy of gabor</string>
     <string name="action_harries">Harries Corner Detector</string>
     <string name="action_reset">Reset Image</string>
     <string name="action_canny">Canny Edge Detector</string>
     <string name="action_gaussian">Gaussian Blur</string>
+
+    <!-- Feature detection -->
+    <string name="title_activity_feature">Feature Detection</string>
 
     <!-- Video strings -->
     <string name="title_activity_video">Motion</string>
@@ -17,6 +20,5 @@
     <string name="action_video_gabor_direction_flicker">Gabor - Flicker</string>
     <string name="action_video_gabor_direction_right">Gabor - Right</string>
     <string name="action_video_9tab">9-tap filter</string>
-    <string name="action_feature_descriptor">Feature Descriptor</string>
-    <string name="title_activity_feature">FeatureActivity</string>
+
 </resources>

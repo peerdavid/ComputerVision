@@ -108,10 +108,6 @@ public class ImageActivity extends AppCompatActivity {
                 applyGaussianBlur();
                 break;
 
-            case R.id.action_feature_descriptor:
-                applyFeatureDescriptor();
-                break;
-
         }
 
         setAndViewCurrentImage();
@@ -194,20 +190,6 @@ public class ImageActivity extends AppCompatActivity {
                 Imgproc.circle(mCurrentImage, new Point(i,j), 10, new Scalar(100));
             }
         }
-    }
-
-
-    private void applyFeatureDescriptor(){
-        MatOfKeyPoint keypoints = new MatOfKeyPoint();
-        Mat descriptors = new Mat();
-        FeatureDetector featureDetector = FeatureDetector.create(FeatureDetector.ORB);
-        DescriptorExtractor descriptor = DescriptorExtractor.create(DescriptorExtractor.ORB);
-
-        featureDetector.detect(mCurrentImage, keypoints);
-        descriptor.compute(mCurrentImage, keypoints, descriptors);
-
-        Features2d.drawKeypoints(mCurrentImage, keypoints, mCurrentImage);
-        setAndViewCurrentImage();
     }
 
 

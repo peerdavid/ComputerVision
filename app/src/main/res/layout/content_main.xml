@@ -24,15 +24,15 @@
             android:layout_height="wrap_content"
             android:text="@string/title_activity_image"/>
 
-        <Button android:id="@+id/btnVideo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/title_activity_video"/>
-
         <Button android:id="@+id/btnFeature"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/title_activity_feature"/>
+
+        <Button android:id="@+id/btnVideo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/title_activity_video"/>
 
     </LinearLayout>
 </RelativeLayout>

@@ -38,10 +38,4 @@
         android:orderInCategory="100"
         android:title="@string/action_harries"
         app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_feature_descriptor"
-        android:orderInCategory="100"
-        android:title="@string/action_feature_descriptor"
-        app:showAsAction="never" />
 </menu>
