@@ -18,10 +18,10 @@ public class OpenCvUtils {
 
 
     private static Mat rotateFrame(Mat image) {
-        //Mat tmp = image.clone();
-        Mat tmp = image.t();
-        Core.flip(image.t(), tmp, 1);
-        Imgproc.resize(tmp, tmp, image.size());
+        Mat tmp = image.clone();
+        //Mat tmp = image.t();
+        //Core.flip(image.t(), tmp, 1);
+        //Imgproc.resize(tmp, tmp, image.size());
         return tmp;
     }
 

@@ -11,7 +11,7 @@
     <string name="action_gaussian">Gaussian Blur</string>
 
     <!-- Feature detection -->
-    <string name="title_activity_feature">Feature Detection</string>
+    <string name="title_activity_feature">Feature Matching</string>
 
     <!-- Video strings -->
     <string name="title_activity_video">Motion</string>

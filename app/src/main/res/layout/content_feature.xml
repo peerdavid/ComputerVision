@@ -13,12 +13,31 @@
     tools:context="tirol.peer.david.computervision.FeatureActivity"
     tools:showIn="@layout/activity_feature">
 
-    <org.opencv.android.JavaCameraView android:id="@+id/cameraView"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="70"
-        android:visibility="gone"
-        opencv:show_fps="true"
-        opencv:camera_id="any"/>
+        android:layout_height="match_parent">
+
+        <org.opencv.android.JavaCameraView android:id="@+id/cameraView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="70"
+            android:visibility="gone"
+            opencv:show_fps="true"
+            opencv:camera_id="any"/>
+
+        <TextView
+            android:text="@string/title_activity_feature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"/>
+
+        <ImageView android:id="@+id/matchingImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="50"/>
+
+    </LinearLayout>
 
 </RelativeLayout>
