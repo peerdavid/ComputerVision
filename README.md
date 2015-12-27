@@ -15,7 +15,9 @@ The following filter, feature detectors etc. are available:
  - Harries corner detector
 
 ## Feature detector / descriptor
- - ORB
+ - ORB feature detector
+ - ORB feature descriptor
+ - Bruteforce hamming feature matching
 
 ## Motion
 Contains motion analysis using x/t transformation and one of the following filter:

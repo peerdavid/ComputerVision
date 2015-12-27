@@ -31,6 +31,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 
 import tirol.peer.david.computervision.utils.Gabor;
+import tirol.peer.david.computervision.utils.OpenCvUtils;
 
 public class ImageActivity extends AppCompatActivity {
 
@@ -126,7 +127,7 @@ public class ImageActivity extends AppCompatActivity {
 
         // Load all views and image
         Uri imageUri = data.getData();
-        Bitmap fullBmp = getBitmapFromUri(imageUri);
+        Bitmap fullBmp = OpenCvUtils.getBitmapFromUri(getContentResolver(), imageUri);
 
         // Scale down for better performance
         Bitmap imageBmp = Bitmap.createScaledBitmap(fullBmp, fullBmp.getWidth() / 4, fullBmp.getHeight() / 4, false);
@@ -204,21 +205,5 @@ public class ImageActivity extends AppCompatActivity {
         Bitmap bmp = Bitmap.createBitmap(mCurrentImage.width(), mCurrentImage.height(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(mCurrentImage, bmp);
         imageView.setImageBitmap(bmp);
-    }
-
-
-    private Bitmap getBitmapFromUri(Uri uri) {
-        try {
-            ParcelFileDescriptor parcelFileDescriptor = getContentResolver().openFileDescriptor(uri, "r");
-            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-            Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
-            parcelFileDescriptor.close();
-
-            return image;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 }
