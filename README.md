@@ -14,10 +14,10 @@ The following filter, feature detectors etc. are available:
  - Canny edge detector
  - Harries corner detector
 
-## Feature detector / descriptor
+## Feature matching (search image in other images)
  - ORB feature detector
  - ORB feature descriptor
- - Bruteforce hamming feature matching
+ - Hamming distance to match features
 
 ## Motion
 Contains motion analysis using x/t transformation and one of the following filter:

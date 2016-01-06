@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -29,6 +30,7 @@ public class FeatureActivity extends AppCompatActivity {
 
     private ImageView mSceneView;
     private ImageView mReferenceView;
+    private TextView mText;
 
     private Mat mReferenceImage;
     private Handler mHandler = new Handler();
@@ -46,6 +48,7 @@ public class FeatureActivity extends AppCompatActivity {
 
         mSceneView = (ImageView) findViewById(R.id.imgScene);
         mReferenceView = (ImageView) findViewById(R.id.imgReference);
+        mText = (TextView) findViewById(R.id.txtView);
 
         FloatingActionButton fabReference = (FloatingActionButton) findViewById(R.id.fabReference);
         fabReference.setOnClickListener(new View.OnClickListener() {
@@ -113,7 +116,7 @@ public class FeatureActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                // Search in other images or restart search
+                // Search in not searched images or restart search
                 if(mSceneImages.size() == 0) {
                     mSceneImages = OpenCvUtils.getAllImages(self);
                 }
@@ -123,20 +126,29 @@ public class FeatureActivity extends AppCompatActivity {
                     Mat imageMat = new Mat (imageBmp.getWidth(), imageBmp.getHeight(), CvType.CV_8UC1);
                     Utils.bitmapToMat(imageBmp, imageMat);
 
+                    // Grayscale image
+                    Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_BGR2GRAY);
+
+                    // Inform user
+                    setText(image.getPath());
+                    setImage(imageMat, mSceneView);
+
+                    // Searched it, so remove from our scene images
                     mSceneImages.remove(image);
 
                     if(mImageFinder.containsImage(imageMat)){
-                        setImage(imageMat, mSceneView);
+                        setText("!!! Match !!!");
                         return;
                     }
                 }
 
+                setText("Searched in all images of your phone...");
+
                 mReferenceImage = null;
                 mSceneImages = new ArrayList<>();
-                mReferenceView.setImageResource(0);
-                mSceneView.setImageResource(0);
+                clearImageViews();
             }
-        }).run();
+        }).start();
 
     }
 
@@ -154,6 +166,27 @@ public class FeatureActivity extends AppCompatActivity {
             @Override
             public void run() {
                 view.setImageBitmap(bmp);
+            }
+        });
+    }
+
+
+    private void setText(final String text) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mText.setText(text);
+            }
+        });
+    }
+
+
+    private void clearImageViews() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mReferenceView.setImageResource(0);
+                mSceneView.setImageResource(0);
             }
         });
     }

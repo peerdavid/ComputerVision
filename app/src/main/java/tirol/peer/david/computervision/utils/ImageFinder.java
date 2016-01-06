@@ -1,20 +1,15 @@
 package tirol.peer.david.computervision.utils;
 
-import org.opencv.calib3d.Calib3d;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
+import android.util.Log;
+
 import org.opencv.core.DMatch;
-import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,15 +21,13 @@ public class ImageFinder {
 
     final private FeatureDetector mFeatureDetector = FeatureDetector.create(FeatureDetector.ORB);
     final private DescriptorExtractor mFeatureDescriptor = DescriptorExtractor.create(DescriptorExtractor.ORB);
-    final private DescriptorMatcher mMatcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE);
+    final private DescriptorMatcher mMatcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 
     private final MatOfKeyPoint mReferenceKeypoints = new MatOfKeyPoint();
     private final Mat mReferenceDescriptors = new Mat();
 
     private final MatOfKeyPoint mSceneKeypoints = new MatOfKeyPoint();
     private final Mat mSceneDescriptors = new Mat();
-
-    private final Mat mSceneCorners = new Mat(4, 1, CvType.CV_32FC2);
 
     public ImageFinder(Mat refImg){
         mRefImg = refImg;
@@ -51,28 +44,37 @@ public class ImageFinder {
 
     public boolean containsImage(Mat img){
 
-        mFeatureDetector.detect(img, mSceneKeypoints);
-        mFeatureDescriptor.compute(img, mSceneKeypoints, mSceneDescriptors);
+        try {
+            mFeatureDetector.detect(img, mSceneKeypoints);
+            mFeatureDescriptor.compute(img, mSceneKeypoints, mSceneDescriptors);
 
-        MatOfDMatch matches = new MatOfDMatch();
-        mMatcher.match(mReferenceDescriptors, mSceneDescriptors, matches);
+            MatOfDMatch matches = new MatOfDMatch();
+            mMatcher.match(mReferenceDescriptors, mSceneDescriptors, matches);
 
-        return findSceneCorners(matches);
+            return checkMatches(matches);
+        } catch (Exception e){
+            Log.e("tirol.peer.david.cv", e.toString());
+        }
+
+        return false;
     }
 
 
-    private boolean findSceneCorners(MatOfDMatch mMatches) {
+    private boolean checkMatches(MatOfDMatch mMatches) {
+
+        // If we have not found at least n matches, we cancel immediately
         List<DMatch> matchesList = mMatches.toList();
-        if (matchesList.size() < 4) {
+        if (matchesList.size() < 10) {
             return false;
         }
 
-        //List<KeyPoint> referenceKeypointsList = mReferenceKeypoints.toList();
-        //List<KeyPoint> sceneKeypointsList = mSceneKeypoints.toList();
-
-        // Calculate the max and min distances between keypoints.
+        // Calculate the min distance, max distance and number of good keypoints
+        //
+        // http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
+        // On page 4 you can find, that good keypoints are smaller than 65
         double maxDist = 0.0;
         double minDist = Double.MAX_VALUE;
+        int numOfGoodKeypoints = 0;
         for(DMatch match : matchesList) {
             double dist = match.distance;
             if (dist < minDist) {
@@ -81,37 +83,28 @@ public class ImageFinder {
             if (dist > maxDist) {
                 maxDist = dist;
             }
+
+            if(dist < 65){
+                numOfGoodKeypoints++;
+            }
         }
 
-        if (minDist > 50.0) {
-            // The target is completely lost.
-            // Discard any previously found corners.
-            mSceneCorners.create(0, 0, mSceneCorners.type());
-            return false;
+        Log.d("tirol.peer.david.cv", "MinDist = " + minDist);
+        Log.d("tirol.peer.david.cv", "MaxDist = " + maxDist);
+        Log.d("tirol.peer.david.cv", "GoodKeypoints = " + numOfGoodKeypoints);
 
-        } else if (minDist > 25.0) {
-            // The target is lost but maybe it is still close.
-            // Keep any previously found corners.
-            return false;
-        }
+        return isAMatch(minDist, numOfGoodKeypoints, matchesList.size());
+    }
 
 
-        // Identify "good" keypoints based on match distance.
-        // ArrayList<Point> goodReferencePointsList =
-        //         new ArrayList<Point>();
-        // ArrayList<Point> goodScenePointsList =
-        //         new ArrayList<Point>();
-        // double maxGoodMatchDist = 1.75 * minDist;
-        // for(DMatch match : matchesList) {
-        //     if (match.distance < maxGoodMatchDist) {
-        //         goodReferencePointsList.add(
-        //                 referenceKeypointsList.get(match.trainIdx).pt);
-        //         goodScenePointsList.add(
-        //                 sceneKeypointsList.get(match.queryIdx).pt);
-        //     }
-        // }
-
-        return true;
-
+    /**
+     * At leas 50% good matches and our min distance should not be too small (I "guessed" this value)
+     * @param minDist
+     * @param numOfGoodKeypoints
+     * @param numOfAllMatches
+     * @return true if it is a match, false otherwise
+     */
+    private boolean isAMatch(double minDist, int numOfGoodKeypoints, int numOfAllMatches) {
+        return minDist < 20.0 && numOfGoodKeypoints > numOfAllMatches * 0.5;
     }
 }
