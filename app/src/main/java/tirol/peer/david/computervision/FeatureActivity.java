@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,6 +40,8 @@ public class FeatureActivity extends AppCompatActivity {
 
     private List<Uri> mSceneImages;
 
+    private Thread mCurrentSearchThread;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +71,12 @@ public class FeatureActivity extends AppCompatActivity {
         });
     }
 
+
+    @Override
+    protected void onStop(){
+        stopSearch();
+        super.onStop();
+    }
 
     private void loadRefImageFromGallery() {
         mSceneImages = new ArrayList<>();
@@ -111,17 +120,24 @@ public class FeatureActivity extends AppCompatActivity {
     private void searchRefImageInGallery() {
 
         final Activity self = this;
+        stopSearch();
 
-        new Thread(new Runnable() {
+        mCurrentSearchThread = new Thread(new Runnable() {
             @Override
             public void run() {
 
                 // Search in not searched images or restart search
                 if(mSceneImages.size() == 0) {
-                    mSceneImages = OpenCvUtils.getAllImages(self);
+                    mSceneImages = OpenCvUtils.getSupportedMatchingImages(self);
                 }
 
                 for(Uri image : new ArrayList<>(mSceneImages)){
+                    if(mCurrentSearchThread.isInterrupted()){
+                        return;
+                    }
+
+                    Log.d("tirol.peer.david.cv", "Match image " + image.toString());
+
                     Bitmap imageBmp = OpenCvUtils.getBitmapFromAbsolteUri(self.getContentResolver(), image);
                     Mat imageMat = new Mat (imageBmp.getWidth(), imageBmp.getHeight(), CvType.CV_8UC1);
                     Utils.bitmapToMat(imageBmp, imageMat);
@@ -148,8 +164,18 @@ public class FeatureActivity extends AppCompatActivity {
                 mSceneImages = new ArrayList<>();
                 clearImageViews();
             }
-        }).start();
+        });
 
+        mCurrentSearchThread.start();
+    }
+
+
+    private void stopSearch(){
+        if(mCurrentSearchThread == null){
+            return;
+        }
+
+        mCurrentSearchThread.interrupt();
     }
 
 

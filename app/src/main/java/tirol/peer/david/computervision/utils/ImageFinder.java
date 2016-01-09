@@ -91,7 +91,7 @@ public class ImageFinder {
 
         Log.d("tirol.peer.david.cv", "MinDist = " + minDist);
         Log.d("tirol.peer.david.cv", "MaxDist = " + maxDist);
-        Log.d("tirol.peer.david.cv", "GoodKeypoints = " + numOfGoodKeypoints);
+        Log.d("tirol.peer.david.cv", "GoodKeypoints = " + numOfGoodKeypoints * 100 / matchesList.size() + "%");
 
         return isAMatch(minDist, numOfGoodKeypoints, matchesList.size());
     }

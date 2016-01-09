@@ -80,7 +80,7 @@ public class OpenCvUtils {
      * @param activity
      * @return ArrayList with images Path
      */
-    public static ArrayList<Uri> getAllImages(Activity activity) {
+    public static ArrayList<Uri> getSupportedMatchingImages(Activity activity) {
         Uri uri;
         Cursor cursor;
         int column_index_data, column_index_folder_name;
@@ -98,8 +98,19 @@ public class OpenCvUtils {
                 .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
         while (cursor.moveToNext()) {
             absolutePathOfImage = cursor.getString(column_index_data);
-            listOfAllImages.add(Uri.parse(absolutePathOfImage));
+
+            if(imageIsSupported(absolutePathOfImage)){
+                listOfAllImages.add(Uri.parse(absolutePathOfImage));
+            }
         }
         return listOfAllImages;
+    }
+
+
+    private static boolean imageIsSupported(String absolutePathOfImage) {
+        String lowerPath = absolutePathOfImage.toLowerCase();
+        return lowerPath.contains("jpg")
+                || lowerPath.contains("jpeg")
+                || lowerPath.contains("png");
     }
 }
